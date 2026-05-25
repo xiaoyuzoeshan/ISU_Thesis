@@ -17,7 +17,15 @@
       <div class="sidebar-subtitle">Student / Supervisor</div>
     </div>
 
-    <nav class="sidebar-nav">
+    <div class="sidebar-role-bar">
+    <div class="role-label">Viewing as</div>
+    <div class="role-toggle">
+      <button class="role-btn active" data-role="student" onclick="setRole('student')">Student</button>
+      <button class="role-btn" data-role="supervisor" onclick="setRole('supervisor')">Supervisor</button>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
       <div class="nav-item active" data-section="dashboard" onclick="navigate('dashboard')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -55,13 +63,6 @@
       </div>
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="role-label">Viewing as</div>
-      <div class="role-toggle">
-        <button class="role-btn active" data-role="student" onclick="setRole('student')">Student</button>
-        <button class="role-btn" data-role="supervisor" onclick="setRole('supervisor')">Supervisor</button>
-      </div>
-    </div>
   </aside>
 
   <!-- Main -->
