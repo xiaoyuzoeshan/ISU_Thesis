@@ -263,6 +263,20 @@
             <button class="btn btn-secondary btn-sm" style="margin-top:6px;" onclick="addChapter()">Add Chapter</button>
           </div>
 
+          <div class="settings-section">
+            <div class="settings-section-title">GitHub Sync</div>
+            <div class="form-group">
+              <label class="form-label">Personal Access Token</label>
+              <input type="password" id="setting-github-token" class="form-input" placeholder="ghp_..." autocomplete="off" />
+              <div class="form-hint">Fine-grained token, <code>Contents: Read &amp; Write</code> on this repo. Stored in your browser, never uploaded.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="pushToRepo()">Push</button>
+              <button class="btn btn-secondary btn-sm" onclick="pullFromRepo()">Pull</button>
+              <span id="gist-sync-status" style="font-size:11.5px;color:var(--text-muted);"></span>
+            </div>
+          </div>
+
           <div style="margin-top:8px;">
             <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
           </div>

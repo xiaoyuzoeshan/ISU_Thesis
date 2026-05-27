@@ -7,7 +7,8 @@ const defaultData = {
     phases: ['Proposal', 'Literature Review', 'Data Collection', 'Analysis', 'Writing', 'Revision', 'Submission'],
     studentName: 'Student',
     supervisorName: 'Supervisor',
-    thesisTitle: 'My Thesis'
+    thesisTitle: 'My Thesis',
+    githubToken: ''
   },
   chapters: [
     { name: 'Chapter 1: Introduction', percentage: 0 },
@@ -831,6 +832,7 @@ function renderSettings() {
   document.getElementById('setting-supervisor-name').value = appData.settings.supervisorName || '';
   document.getElementById('setting-deadline').value = appData.settings.deadline || '';
   document.getElementById('setting-phase').value = appData.settings.currentPhase || '';
+  document.getElementById('setting-github-token').value = appData.settings.githubToken || '';
 
   // Phase dropdown options
   const phaseSelect = document.getElementById('setting-phase');
@@ -879,12 +881,117 @@ function saveSettings() {
   appData.settings.supervisorName = document.getElementById('setting-supervisor-name').value.trim();
   appData.settings.deadline = document.getElementById('setting-deadline').value;
   appData.settings.currentPhase = document.getElementById('setting-phase').value;
+  appData.settings.githubToken = document.getElementById('setting-github-token').value.trim();
   saveData();
   // Update sidebar subtitle
   document.querySelector('.sidebar-subtitle').textContent =
     appData.settings.studentName + ' / ' + appData.settings.supervisorName;
   renderDashboard();
   alert('Settings saved.');
+}
+
+// ─── GitHub Repo Sync ─────────────────────────────────────────────────────────
+
+const GITHUB_REPO = 'xiaoyuzoeshan/ISU_Thesis';
+const GITHUB_DATA_FILE = 'logbook-data.json';
+
+function updateSyncStatus(msg, isError) {
+  const el = document.getElementById('gist-sync-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = isError ? '#C53030' : 'var(--text-muted)';
+}
+
+async function pushToRepo() {
+  appData.settings.githubToken = document.getElementById('setting-github-token').value.trim();
+  saveData();
+
+  const token = appData.settings.githubToken;
+  if (!token) { updateSyncStatus('No token — enter your GitHub Personal Access Token first.', true); return; }
+
+  updateSyncStatus('Pushing...');
+
+  const dataToSync = JSON.parse(JSON.stringify(appData));
+  delete dataToSync.settings.githubToken;
+  // btoa with unicode support
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToSync, null, 2))));
+
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github+json' };
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+
+  try {
+    // Get current SHA (required for updates; 404 means first push)
+    let sha = null;
+    const getRes = await fetch(url, { headers });
+    if (getRes.ok) {
+      sha = (await getRes.json()).sha;
+    } else if (getRes.status !== 404) {
+      const err = await getRes.json().catch(() => ({}));
+      updateSyncStatus('Error: ' + (err.message || getRes.statusText), true);
+      return;
+    }
+
+    const putRes = await fetch(url, {
+      method: 'PUT', headers,
+      body: JSON.stringify({
+        message: `Update logbook data — ${new Date().toISOString().slice(0, 10)}`,
+        content,
+        ...(sha ? { sha } : {})
+      })
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      updateSyncStatus('Error: ' + (err.message || putRes.statusText), true);
+      return;
+    }
+
+    const t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    updateSyncStatus('Pushed at ' + t);
+  } catch (e) {
+    updateSyncStatus('Network error: ' + e.message, true);
+  }
+}
+
+async function pullFromRepo() {
+  appData.settings.githubToken = document.getElementById('setting-github-token').value.trim();
+  saveData();
+
+  updateSyncStatus('Pulling...');
+
+  const token = appData.settings.githubToken;
+  const headers = { 'Accept': 'application/vnd.github+json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`;
+
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      if (res.status === 404) { updateSyncStatus('No data file in repo yet — push first.', true); return; }
+      const err = await res.json().catch(() => ({}));
+      updateSyncStatus('Error: ' + (err.message || res.statusText), true);
+      return;
+    }
+
+    const file = await res.json();
+    const rawContent = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    const pulled = JSON.parse(rawContent);
+
+    const localToken = appData.settings.githubToken;
+    appData = Object.assign({}, pulled);
+    appData.settings.githubToken = localToken;
+    saveData();
+
+    const t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    updateSyncStatus('Pulled at ' + t);
+
+    document.querySelector('.sidebar-subtitle').textContent =
+      (appData.settings.studentName || 'Student') + ' / ' + (appData.settings.supervisorName || 'Supervisor');
+    renderSettings();
+    renderSection(currentSection);
+  } catch (e) {
+    updateSyncStatus('Error: ' + e.message, true);
+  }
 }
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
