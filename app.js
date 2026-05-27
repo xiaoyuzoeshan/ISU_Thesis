@@ -104,8 +104,9 @@ function statusLabel(s) {
   return { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'completed': 'Completed', 'delayed': 'Delayed' }[s] || s;
 }
 
-function showSaveIndicator() {
+function showSaveIndicator(msg) {
   const el = document.getElementById('saveIndicator');
+  el.textContent = msg || 'Saved';
   el.classList.add('show');
   clearTimeout(el._timer);
   el._timer = setTimeout(() => el.classList.remove('show'), 1800);
@@ -892,6 +893,27 @@ function saveSettings() {
 
 // ─── GitHub Repo Sync ─────────────────────────────────────────────────────────
 
+async function autoSyncOnLoad() {
+  const token = appData.settings.githubToken;
+  if (!token) return;
+  try {
+    const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' };
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_DATA_FILE}`, { headers });
+    if (!res.ok) return;
+    const file = await res.json();
+    const rawContent = decodeURIComponent(escape(atob(file.content.replace(/\n/g, ''))));
+    const pulled = JSON.parse(rawContent);
+    appData = Object.assign({}, pulled);
+    appData.settings.githubToken = token;
+    saveData();
+    document.querySelector('.sidebar-subtitle').textContent =
+      (appData.settings.studentName || 'Student') + ' / ' + (appData.settings.supervisorName || 'Supervisor');
+    renderSection(currentSection);
+    showSaveIndicator('Synced');
+  } catch (e) { /* silent fail */ }
+}
+
+
 const GITHUB_REPO = 'xiaoyuzoeshan/ISU_Thesis';
 const GITHUB_DATA_FILE = 'logbook-data.json';
 
@@ -1019,6 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
     (appData.settings.studentName || 'Student') + ' / ' + (appData.settings.supervisorName || 'Supervisor');
 
   navigate('dashboard');
+  autoSyncOnLoad();
 
   // Close modals on overlay click
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
