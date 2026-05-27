@@ -1,0 +1,79 @@
+{
+  "settings": {
+    "deadline": "2026-12-05",
+    "currentPhase": "Literature Review",
+    "phases": [
+      "Proposal",
+      "Literature Review",
+      "Data Collection",
+      "Analysis",
+      "Writing",
+      "Revision",
+      "Submission"
+    ],
+    "studentName": "Zoe",
+    "supervisorName": "Supervisor",
+    "thesisTitle": "My Thesis"
+  },
+  "chapters": [
+    {
+      "name": "Chapter 1: Introduction",
+      "percentage": 1
+    },
+    {
+      "name": "Chapter 2: Theoretical Framework and Literature Review",
+      "percentage": 1
+    },
+    {
+      "name": "Chapter 3: The Current Institutional Landscape of LEO Constellation Governance",
+      "percentage": 0
+    },
+    {
+      "name": "Chapter 4: The Incentive Roots of Bidirectional Data Distortion",
+      "percentage": 0
+    },
+    {
+      "name": "Chapter 5: Reform Design for Incentive Compatibility",
+      "percentage": 0
+    },
+    {
+      "name": "Chapter 6: Conclusion",
+      "percentage": 0
+    }
+  ],
+  "weeks": {
+    "2026-W22": {
+      "plan": "",
+      "progress": "",
+      "status": "not-started",
+      "syncNodes": [],
+      "duties": [
+        {
+          "id": "mpmynyr6vt38zqv9ljs",
+          "title": "Theoretical and Literature Review",
+          "taskStatus": "in-progress",
+          "notes": "1. Institutional Economics: The Theory of Monitoring Costs and the Theory of Information Asymmetry\n2. An Introduction to Game Theory\n3. Historical Institutionalism\n4. Mechanism Design\n5. International Regime Theory\n"
+        }
+      ]
+    }
+  },
+  "documents": [],
+  "posts": [
+    {
+      "id": "mpo1gmzmnqwdcxmqml",
+      "postType": "action-needed",
+      "title": "Test",
+      "content": "",
+      "date": "2026-05-27",
+      "resolved": false
+    },
+    {
+      "id": "mpmybduhqjcf7xpi2cs",
+      "postType": "action-needed",
+      "title": "The new proposal still waiting for signature",
+      "content": "",
+      "date": "2026-05-26",
+      "resolved": false
+    }
+  ]
+}
